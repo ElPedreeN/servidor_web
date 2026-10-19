@@ -1,121 +1,36 @@
-# Servidor Web PHP + MySQL
+# Organix — Dashboard no Tomcat
 
-Ambiente simples para atividades com PHP e MySQL no GitHub Codespaces.
+Dashboard React/TypeScript com Tailwind, publicada como arquivos estáticos no Apache Tomcat 10.1 (Java 17). Não requer servlet, PHP, banco de dados ou autenticação para abrir.
 
-## Recursos
+## Preparar e executar
 
-- PHP 8.2 com Apache
-- MariaDB/MySQL no mesmo container
-- phpMyAdmin para administrar o banco pelo navegador
-- Cliente `mysql` no terminal
-- Pasta `htdocs` como raiz do projeto PHP
-- Página exemplo com "Olá Mundo"
-
-## Como usar
-
-1. Crie uma cópia deste repositório usando o botão `Use this template`.
-2. Na cópia do repositório pelo botão "<> Code" > "Codespaces" > "Create codespace on master" para abrir o repositório no GitHub Codespaces.
-3. Aguarde o ambiente iniciar.
-
-Os serviços do Apache e do MariaDB são iniciados automaticamente quando o Codespace abre.
-
-## Acessos
-
-No GitHub Codespaces, acesse a aplicação pela URL da porta `80`.
-
-Para encontrar essa URL:
-
-1. Abra a aba `Ports` no painel inferior do VS Code.
-2. Procure a porta `80`.
-3. Clique em `Open in Browser`.
-
-A URL normalmente aparece neste formato:
-
-```text
-https://NOME-DO-CODESPACE-80.app.github.dev
-```
-
-Teste acessar o phpMyAdmin pelo url:
-
-```text
-https://NOME-DO-CODESPACE-80.app.github.dev/phpmyadmin/
-```
-
-No phpMyAdmin, entre com o usuário `root` e deixe o campo de senha vazio.
-
-Nenhum banco de dados é criado automaticamente. Crie o banco pelo phpMyAdmin ou pelo terminal.
-
-## Terminal MySQL
-
-Para entrar no MySQL como root:
+Pré-requisitos: Node.js 22.12+ (validado com 24), npm, Docker, curl e ripgrep.
 
 ```bash
-mysql -u root
+bash scripts/install.sh
+bash scripts/start.sh
 ```
 
-## Se o banco nao conectar
+A aplicação é servida na porta 8080, no contexto raiz. O container chama-se `organix-tomcat`. O script de inicialização recompila e publica o frontend; rode-o novamente após editar `frontend/src/App.tsx`. Para parar: `docker stop organix-tomcat`.
 
-Se aparecer erro de conexão com o MySQL/MariaDB ou com o phpMyAdmin, rode:
+A dashboard abre diretamente, sem login. As alterações de tarefas são apenas em memória e são perdidas ao recarregar. A navegação para outras telas foi desativada nesta entrega. A API PHP referenciada no código original não é necessária nem foi instalada; a integração completa e autenticação estão fora deste escopo.
+
+## Gerar WAR
 
 ```bash
-bash .devcontainer/start-codespace-services.sh
+cd frontend
+npm run build
+cd dist
+jar -cf ../../organix.war .
 ```
 
-Depois tente entrar novamente.
+O comando `jar` exige um JDK. Para servir na raiz de outro Tomcat, publique como `ROOT.war`. A fonte externa DM Sans é opcional; há fontes locais de fallback.
 
-Para criar um banco de dados pelo terminal:
+## Downloads prontos
 
-```bash
-CREATE DATABASE nome_do_banco;
-```
+- [ROOT.war](downloads/ROOT.war): dashboard compilada, pronta para Tomcat.
+- [Código-fonte ZIP](downloads/organix-frontend.zip): frontend para edição.
 
-## Exemplo de conexao PHP
-
-Depois de criar um banco, use o host `127.0.0.1` para conectar no MariaDB criando o arquivo conecta.php com o código abaixo:
-
-```php
-<?php
-try {
-    $conn = new PDO('mysql:host=127.0.0.1;port=3306;dbname=nome_do_banco;charset=utf8', 'root', '');
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo 'Conectado ao banco de dados!';
-} catch (PDOException $e) {
-    die('Erro ao conectar: ' . $e->getMessage());
-}
-```
-Para testar, acrescente `/conecta.php` no final do endereço, por exemplo:
-
-```text
-https://NOME-DO-CODESPACE-80.app.github.dev/conecta.php
-```
-
-Note que foram usados esses dados no código PHP ao MariaDB dentro do Codespace:
-
-```text
-Host: 127.0.0.1
-Porta: 3306
-Usuario: root
-Senha: em branco
-```
-
-## Salvando o banco de dados
-
-Os bancos criados no MariaDB ficam salvos apenas dentro do Codespace atual.
-
-Se você parar e abrir o mesmo Codespace novamente, os dados normalmente continuam disponíveis. Mas, se o Codespace for apagado, recriado ou reconstruído, os bancos podem ser perdidos.
-
-Para guardar um banco importante, exporte o banco para um arquivo `.sql` na raiz do projeto.
-
-Exemplo:
-
-```bash
-mysqldump -u root nome_do_banco > backup.sql
-```
-
-Esse comando cria o arquivo `backup.sql` na raiz do projeto, baixe ou comite ele no projeto.
-
-Para restaurar o backup depois:
-
-```bash
-mysql -u root nome_do_banco < backup.sql
-```
+No GitHub, abra o arquivo desejado e clique em **Download raw file**.
+Pare o Tomcat, faça backup da aplicação ROOT anterior e copie ROOT.war para webapps.
+Inicie o Tomcat e abra http://localhost:8080/. Mantenha o nome ROOT.war para os assets carregarem no contexto raiz.

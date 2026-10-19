@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import 'tailwindcss';
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-green-primary: #16a34a;
+  --color-green-light: #dcfce7;
+  --color-green-hover: #15803d;
+}
+
+* {
+  font-family: 'DM Sans', sans-serif;
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar { display: none; }
+
+body {
+  background: #ffffff;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
+
+html.dark body {
+  background: #030712;
+  color: #f9fafb;
+}
